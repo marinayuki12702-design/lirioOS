@@ -1,0 +1,36 @@
+name: Build LirioOS ISO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [principal]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Obtener el código
+        uses: actions/checkout@v4
+
+      - name: Instalar herramientas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld make git xorriso
+
+      - name: Construir kernel e ISO
+        run: ./build-iso.sh
+
+      - name: Publicar ISO como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: LirioOS-0.1-x86_64
+          path: |
+            build/LirioOS-0.1-x86_64.iso
+            build/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
